@@ -6,9 +6,9 @@
    ⚙️ CONFIG — عدّل هنا معلومات متجرك بسهولة
    ========================================================= */
 const CONFIG = {
-  whatsapp: "96176000000",            // ⚠️ ضع رقم الواتساب بصيغة دولية بدون + (مثال: 96170123456)
-  phoneDisplay: "+961 76 000 000",    // الرقم كما يظهر للزوار
-  address: { ar: "بعبدا — جبل لبنان، لبنان", en: "Baabda — Mount Lebanon, Lebanon" },
+  whatsapp: "96170448544",            // ⚠️ ضع رقم الواتساب بصيغة دولية بدون + (مثال: 96170123456)
+  phoneDisplay: "+961 70 448 544",    // الرقم كما يظهر للزوار
+  address: { ar: "صنائع بيروت — الفرع الرئيسي، لبنان", en: "Sanayeh Beirut — Main Branch, Lebanon" },
   instagram: "https://instagram.com/secretscakes",
   facebook: "https://facebook.com/secretscakes",
   tiktok: "https://tiktok.com/@secretscakes",

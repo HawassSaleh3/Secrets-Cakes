@@ -188,6 +188,7 @@ function openLightbox(i) {
   lbIndex = i;
   $("#lightbox").classList.add("open");
   updateLightbox();
+  syncBodyLock();
 }
 function updateLightbox() {
   const g = GALLERY[lbIndex];
@@ -326,13 +327,15 @@ function renderStepContent() {
         .join("")}</div>`;
   } else if (b.step === 6) {
     const dl = BUILDER.delivery;
+    const dlIcon = { pickup: "🏪", standard: "🚗", express: "⚡" };
     html = `<h3 class="bstep-title">${t("bld_s6_t")}</h3><p class="bstep-desc">${t("bld_s6_d")}</p>
+      <h4 class="bstep-title" style="font-size:1.1rem;margin:10px 0 12px">${t("bld_delivery")}</h4>
       <div class="opt-grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">
         ${dl.map((d) => {
           const sel = b.delivery === d.id;
           return `<div class="opt ${sel ? "sel" : ""}" data-group="delivery" data-id="${d.id}">
             ${d.price ? `<span class="price-tag">+${fmt(d.price)}</span>` : d.pct ? `<span class="price-tag">+${d.pct}%</span>` : ""}
-            <span class="oi">🚗</span><b>${d[L]}</b></div>`;
+            <span class="oi">${dlIcon[d.id] || "🚗"}</span><b>${d[L]}</b></div>`;
         }).join("")}
       </div>
       <div style="margin-top:24px">
@@ -382,6 +385,7 @@ function renderStepContent() {
     next.classList.add("btn-gold");
   } else {
     next.innerHTML = `${t("next")} <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${document.documentElement.dir === "rtl" ? '<path d="M15 18l-6-6 6-6"/>' : '<path d="M9 18l6-6-6-6"/>'}</svg>`;
+    next.classList.remove("btn-gold");
     next.classList.add("btn-ghost");
   }
   next.disabled = !stepValid(b.step);
@@ -479,7 +483,7 @@ function updateSummary() {
   const flavorTxt = p.flavor ? p.flavor[L] : t("sum_none");
   const fillingTxt = p.filling ? p.filling[L] : t("sum_none");
   const coatingTxt = p.coating ? p.coating[L] : t("sum_none");
-  const addonsTxt = p.addons.length ? p.addons.map((a) => a[L]).join("، ") : t("sum_none");
+  const addonsTxt = p.addons.length ? p.addons.map((a) => a[L]).join(L === "ar" ? "، " : ", ") : t("sum_none");
   const delivTxt = p.deliv ? p.deliv[L] : t("sum_none");
 
   $("#sumRows").innerHTML = `
@@ -585,23 +589,32 @@ function initNav() {
 
   // burger
   const burger = $("#burger"), menu = $("#mobileMenu");
+  const closeMenu = () => {
+    burger.classList.remove("open");
+    menu.classList.remove("open");
+    syncBodyLock();
+  };
   burger.addEventListener("click", () => {
     burger.classList.toggle("open");
     menu.classList.toggle("open");
+    syncBodyLock();
   });
-  $$("#mobileMenu a").forEach((a) =>
-    a.addEventListener("click", () => {
-      burger.classList.remove("open");
-      menu.classList.remove("open");
-    })
-  );
+  $$("#mobileMenu a").forEach((a) => a.addEventListener("click", closeMenu));
+  $$("#mobileMenu button").forEach((btn) => btn.addEventListener("click", closeMenu));
+}
+
+function syncBodyLock() {
+  const locked =
+    $("#mobileMenu")?.classList.contains("open") ||
+    $("#lightbox")?.classList.contains("open");
+  document.body.classList.toggle("no-scroll", !!locked);
 }
 
 /* =========================================================
    CURSOR (desktop)
    ========================================================= */
 function initCursor() {
-  if (!window.matchMedia("(pointer: fine)").matches) return;
+  if (!window.matchMedia || !window.matchMedia("(pointer: fine)").matches) return;
   const dot = document.createElement("div"), ring = document.createElement("div");
   dot.className = "cursor-dot";
   ring.className = "cursor-ring";
@@ -616,9 +629,14 @@ function initCursor() {
     ring.style.transform = `translate(${rx - 19}px, ${ry - 19}px)`;
     requestAnimationFrame(loop);
   })();
-  $$("a, button, .opt, .addon, .g-item, .occ-card").forEach((el) => {
-    el.addEventListener("mouseenter", () => ring.classList.add("hovering"));
-    el.addEventListener("mouseleave", () => ring.classList.remove("hovering"));
+  // delegation: catches dynamically rendered cards/options too
+  const hoverSel = "a, button, .opt, .addon, .g-item, .occ-card";
+  document.addEventListener("mouseover", (e) => {
+    if (e.target.closest(hoverSel)) ring.classList.add("hovering");
+  });
+  document.addEventListener("mouseout", (e) => {
+    const from = e.target.closest(hoverSel);
+    if (from && !from.contains(e.relatedTarget)) ring.classList.remove("hovering");
   });
 }
 
@@ -626,68 +644,78 @@ function initCursor() {
    INIT
    ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // preloader
+  // preloader — safe fallback so the site never stays hidden
   window.addEventListener("load", () => {
     setTimeout(() => $("#preloader").classList.add("done"), 500);
   });
   setTimeout(() => $("#preloader").classList.add("done"), 2600); // fallback
 
-  initNav();
-  initCursor();
-  setLang(STATE.lang);
+  // wrap each init so one failing feature never blocks the rest
+  const safe = (fn) => { try { fn(); } catch (err) { console.error(err); } };
+  safe(initNav);
+  safe(initCursor);
+  safe(() => setLang(STATE.lang));
 
   // builder nav buttons
-  $("#bPrev").addEventListener("click", () => {
-    if (B().step > 1) { B().step--; renderBuilder(); }
-  });
-  $("#bNext").addEventListener("click", () => {
-    if (!stepValid(B().step)) return;
-    if (B().step < 6) { B().step++; renderBuilder(); }
-    else {
-      toast("toast_order");
-      const p = calcPrice();
-      window.open(waLink(buildOrderMessage(p)), "_blank");
-    }
+  safe(() => {
+    $("#bPrev").addEventListener("click", () => {
+      if (B().step > 1) { B().step--; renderBuilder(); }
+    });
+    $("#bNext").addEventListener("click", () => {
+      if (!stepValid(B().step)) return;
+      if (B().step < 6) { B().step++; renderBuilder(); }
+      else {
+        toast("toast_order");
+        const p = calcPrice();
+        window.open(waLink(buildOrderMessage(p)), "_blank");
+      }
+    });
   });
 
   // lightbox
-  $("#lbClose").addEventListener("click", () => $("#lightbox").classList.remove("open"));
-  $("#lbPrev").addEventListener("click", () => lbNav(-1));
-  $("#lbNext").addEventListener("click", () => lbNav(1));
-  $("#lightbox").addEventListener("click", (e) => {
-    if (e.target.id === "lightbox") $("#lightbox").classList.remove("open");
-  });
-  document.addEventListener("keydown", (e) => {
-    if (!$("#lightbox").classList.contains("open")) return;
-    if (e.key === "Escape") $("#lightbox").classList.remove("open");
-    if (e.key === "ArrowRight") lbNav(document.documentElement.dir === "rtl" ? -1 : 1);
-    if (e.key === "ArrowLeft") lbNav(document.documentElement.dir === "rtl" ? 1 : -1);
+  safe(() => {
+    const lb = $("#lightbox");
+    const closeLb = () => { lb.classList.remove("open"); syncBodyLock(); };
+    $("#lbClose").addEventListener("click", closeLb);
+    $("#lbPrev").addEventListener("click", () => lbNav(-1));
+    $("#lbNext").addEventListener("click", () => lbNav(1));
+    lb.addEventListener("click", (e) => { if (e.target.id === "lightbox") closeLb(); });
+    document.addEventListener("keydown", (e) => {
+      if (!lb.classList.contains("open")) return;
+      if (e.key === "Escape") closeLb();
+      if (e.key === "ArrowRight") lbNav(document.documentElement.dir === "rtl" ? -1 : 1);
+      if (e.key === "ArrowLeft") lbNav(document.documentElement.dir === "rtl" ? 1 : -1);
+    });
   });
 
   // language switches
-  [["#langAr", "ar"], ["#langEn", "en"], ["#langArM", "ar"], ["#langEnM", "en"]].forEach(
-    ([sel, lang]) =>
-      $(sel).addEventListener("click", () => {
-        if (STATE.lang !== lang) setLang(lang, true);
-      })
-  );
+  safe(() => {
+    [["#langAr", "ar"], ["#langEn", "en"], ["#langArM", "ar"], ["#langEnM", "en"]].forEach(
+      ([sel, lang]) =>
+        $(sel).addEventListener("click", () => {
+          if (STATE.lang !== lang) setLang(lang, true);
+        })
+    );
+  });
 
   // contact links
-  $("#telLink").href = "tel:" + CONFIG.phoneDisplay.replace(/\s/g, "");
-  $("#telLink").textContent = CONFIG.phoneDisplay;
-  $("#waFloat").href = `https://wa.me/${CONFIG.whatsapp}`;
-  $("#navWa").href = waLink(
-    STATE.lang === "ar"
-      ? "مرحباً سيكرتس كيكز 🎂\nأودّ الاستفسار عن طلب كيكة خاصة."
-      : "Hello Secrets Cakes 🎂\nI'd like to ask about a custom cake order."
-  );
-  $$(".ig-link").forEach((a) => (a.href = CONFIG.instagram));
-  $$(".fb-link").forEach((a) => (a.href = CONFIG.facebook));
-  $$(".tt-link").forEach((a) => (a.href = CONFIG.tiktok));
+  safe(() => {
+    $("#telLink").href = "tel:" + CONFIG.phoneDisplay.replace(/\s/g, "");
+    $("#telLink").textContent = CONFIG.phoneDisplay;
+    $("#waFloat").href = `https://wa.me/${CONFIG.whatsapp}`;
+    $("#navWa").href = waLink(
+      STATE.lang === "ar"
+        ? "مرحباً سيكرتس كيكز 🎂\nأودّ الاستفسار عن طلب كيكة خاصة."
+        : "Hello Secrets Cakes 🎂\nI'd like to ask about a custom cake order."
+    );
+    $$(".ig-link").forEach((a) => (a.href = CONFIG.instagram));
+    $$(".fb-link").forEach((a) => (a.href = CONFIG.facebook));
+    $$(".tt-link").forEach((a) => (a.href = CONFIG.tiktok));
 
-  $("#fabTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
-  const yearEl = $("#year");
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
+    $("#fabTop").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    const yearEl = $("#year");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+  });
 
-  observeReveals();
+  safe(observeReveals);
 });

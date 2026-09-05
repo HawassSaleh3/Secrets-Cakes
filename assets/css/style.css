@@ -19,7 +19,7 @@
   --line-gold: rgba(238, 193, 138, 0.25);
 
   --text: #f4eef6;
-  --muted: #b7abC2;
+  --muted: #b7abc2;
 
   --grad-gold: linear-gradient(120deg, #fed3a9 0%, #ac7d53 38%, #cba58e 60%, #cdb4da 100%);
   --grad-btn: linear-gradient(120deg, #815823 0%, #ac7d53 45%, #cba58e 70%, #fed3a9 100%);
@@ -964,9 +964,14 @@ html[dir="rtl"] .about-visual::after { inset: 22px 22px -22px -22px; }
 #lbCaption {
   position: absolute;
   bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(860px, 92vw);
+  text-align: center;
   color: var(--muted);
   font-size: 0.9rem;
   letter-spacing: 0.08em;
+  pointer-events: none;
 }
 
 /* ---------- Testimonials ---------- */
@@ -1114,7 +1119,7 @@ footer {
 #toast {
   position: fixed;
   bottom: 30px;
-  inset-inline-start: 50%;
+  left: 50%; /* physical center — RTL/LTR agnostic */
   transform: translateX(-50%) translateY(20px);
   background: var(--bg-card-2);
   border: 1px solid var(--line-gold);
@@ -1165,7 +1170,17 @@ footer {
   .builder-steps-bar .bstep span { display: none; }
   .contact-grid { grid-template-columns: 1fr; }
   .nav-actions .btn { display: none; }
+  #lightbox { padding: 16px; }
+  .lb-btn { width: 40px; height: 40px; }
+  #lbPrev { inset-inline-start: 8px; }
+  #lbNext { inset-inline-end: 8px; }
+  #lbClose { top: 14px; inset-inline-end: 14px; }
+  #lbCaption { bottom: 12px; }
+  .floaters { bottom: 18px; inset-inline-end: 18px; }
 }
+
+/* lock page scroll when overlay is open */
+body.no-scroll { overflow: hidden; }
 
 /* reduce motion */
 @media (prefers-reduced-motion: reduce) {

@@ -4,6 +4,7 @@
    ============================================================ */
 
 :root {
+  color-scheme: dark;
   --lavender: #cdb4da;
   --mauve: #a784ae;
   --tan: #cba58e;
@@ -19,7 +20,7 @@
   --line-gold: rgba(238, 193, 138, 0.25);
 
   --text: #f4eef6;
-  --muted: #b7abC2;
+  --muted: #b7abc2;
 
   --grad-gold: linear-gradient(120deg, #fed3a9 0%, #ac7d53 38%, #cba58e 60%, #cdb4da 100%);
   --grad-btn: linear-gradient(120deg, #815823 0%, #ac7d53 45%, #cba58e 70%, #fed3a9 100%);
@@ -40,6 +41,14 @@ html[lang="en"] {
   --font-head: "Playfair Display", "Cormorant Garamond", serif;
   --font-body: "Jost", "Cairo", sans-serif;
 }
+
+/* Arabic script is cursive — letter-spacing breaks letter joining,
+   so reset it on Arabic-tracked elements (Latin display text keeps its own) */
+html[lang="ar"] :is(
+  .brand-name small, .kicker, .hero-badge, .scroll-hint,
+  .lang-switch button, .cake-tag, .field label,
+  .contact-card h4, #lbCaption
+) { letter-spacing: normal; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -137,6 +146,7 @@ button { font-family: inherit; cursor: pointer; }
   }
   .cursor-ring.hovering {
     width: 58px; height: 58px;
+    margin: -10px 0 0 -10px; /* recenter: half of the 20px growth */
     background: rgba(205, 180, 218, 0.12);
     border-color: var(--lavender);
   }
@@ -961,6 +971,7 @@ html[dir="rtl"] .about-visual::after { inset: 22px 22px -22px -22px; }
 #lbClose { top: 26px; inset-inline-end: 26px; }
 #lbPrev { inset-inline-start: 26px; top: 50%; transform: translateY(-50%); }
 #lbNext { inset-inline-end: 26px; top: 50%; transform: translateY(-50%); }
+html[dir="rtl"] #lbPrev, html[dir="rtl"] #lbNext { transform: translateY(-50%) scaleX(-1); }
 #lbCaption {
   position: absolute;
   bottom: 26px;
@@ -1114,7 +1125,7 @@ footer {
 #toast {
   position: fixed;
   bottom: 30px;
-  inset-inline-start: 50%;
+  left: 50%; /* physical property: translateX(-50%) centers correctly in both LTR and RTL */
   transform: translateX(-50%) translateY(20px);
   background: var(--bg-card-2);
   border: 1px solid var(--line-gold);
@@ -1128,6 +1139,9 @@ footer {
   transition: 0.4s var(--ease);
   box-shadow: var(--shadow-lg);
   white-space: nowrap;
+  max-width: 92vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 

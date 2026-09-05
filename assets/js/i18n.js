@@ -14,6 +14,7 @@ const I18N = {
     nav_gallery: "المعرض",
     nav_contact: "تواصل",
     nav_order: "اطلب الآن",
+    brand_sub: "أتيليه الكيك الفاخر",
 
     // Hero
     hero_badge: "أتيليه كيك فاخر — بعبدا، جبل لبنان",
@@ -121,7 +122,6 @@ const I18N = {
     // Buttons
     next: "التالي",
     back: "السابق",
-    finish: "استعراض الطلب",
 
     // Occasions
     occ_kicker: "مناسباتكم",
@@ -183,6 +183,7 @@ const I18N = {
     nav_gallery: "Gallery",
     nav_contact: "Contact",
     nav_order: "Order Now",
+    brand_sub: "Luxury Cake Atelier",
 
     hero_badge: "Luxury Cake Atelier — Baabda, Mount Lebanon",
     hero_t1: "Every Cake",
@@ -282,7 +283,6 @@ const I18N = {
 
     next: "Next",
     back: "Back",
-    finish: "Review Order",
 
     occ_kicker: "Your Occasions",
     occ_title1: "For Every Occasion,",
@@ -336,7 +336,7 @@ const PRODUCTS = [
     img: "assets/img/cakes/black-velvet.jpg",
     tag: "coll_tag1",
     price: 65,
-    ar: { name: "بلاك فيلفيت الملكي", desc: "كيك شوكولاتة سوداء مخمّرة بغاناش فاخر، تسيلاب ذهبي ورقائق شوكولاتة مذهّبة" },
+    ar: { name: "بلاك فيلفيت الملكي", desc: "كيك شوكولاتة سوداء مخملية بغاناش فاخر، تسيلاب ذهبي ورقائق شوكولاتة مذهّبة" },
     en: { name: "Royal Black Velvet", desc: "Decadent black velvet chocolate cake, ganache glaze, gold drip and gilded shards" },
   },
   {
@@ -451,7 +451,7 @@ const REVIEWS = [
   },
   {
     occ: "rev_occ_grad",
-    ar: { name: "طوني ص.", text: "احترافية من أول رسالة ولات آخر تفصيل. كيكة تخرج ابنتي كانت قطعة فنية بجدارة. صارت أطلبيتهم عادة عند كل مناسباتنا العائلية." },
+    ar: { name: "طوني ص.", text: "احترافية من أول رسالة لآخر تفصيلة. كيكة تخرّج ابنتي كانت قطعة فنية بجدارة. صار الطلب منهم عادة عند كل مناسباتنا العائلية." },
     en: { name: "Tony S.", text: "Professional from the first message to the last detail. My daughter's graduation cake was truly a work of art. Now it's a family tradition for every occasion." },
   },
 ];

@@ -47,9 +47,11 @@
         <li><a href="#home" class="active" data-i18n="nav_home">الرئيسية</a></li>
         <li><a href="#about" data-i18n="nav_about">قصتنا</a></li>
         <li><a href="#collection" data-i18n="nav_collection">التشكيلة</a></li>
+        <li><a href="#menu" data-i18n="nav_menu">القائمة الكاملة</a></li>
         <li><a href="#builder" data-i18n="nav_builder">صمّم كيكتك</a></li>
         <li><a href="#occasions" data-i18n="nav_occasions">المناسبات</a></li>
         <li><a href="#gallery" data-i18n="nav_gallery">المعرض</a></li>
+        <li><a href="#branches" data-i18n="nav_branches">فروعنا</a></li>
         <li><a href="#contact" data-i18n="nav_contact">تواصل</a></li>
       </ul>
     </nav>
@@ -72,9 +74,11 @@
     <a href="#home" data-i18n="nav_home">الرئيسية</a>
     <a href="#about" data-i18n="nav_about">قصتنا</a>
     <a href="#collection" data-i18n="nav_collection">التشكيلة</a>
+    <a href="#menu" data-i18n="nav_menu">القائمة الكاملة</a>
     <a href="#builder" data-i18n="nav_builder">صمّم كيكتك</a>
     <a href="#occasions" data-i18n="nav_occasions">المناسبات</a>
     <a href="#gallery" data-i18n="nav_gallery">المعرض</a>
+    <a href="#branches" data-i18n="nav_branches">فروعنا</a>
     <a href="#contact" data-i18n="nav_contact">تواصل</a>
     <div class="lang-switch">
       <button id="langArM" class="on">عربي</button>
@@ -156,7 +160,19 @@
             <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16"/><path d="M6 16c0-5 3-9 6-9s6 4 6 9"/><path d="M9 12h.01M12 11h.01M15 12h.01"/></svg></span>
             <div><b data-i18n="about_f3_t"></b><p data-i18n="about_f3_d"></p></div>
           </li>
+          <li class="reveal" data-delay="4">
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5L8 13.8 2 9.2h7.6z"/></svg></span>
+            <div><b data-i18n="about_secret1_t"></b><p data-i18n="about_secret1_d"></p></div>
+          </li>
+          <li class="reveal" data-delay="4">
+            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+            <div><b data-i18n="about_secret2_t"></b><p data-i18n="about_secret2_d"></p></div>
+          </li>
         </ul>
+        <div class="franchise-strip reveal" data-delay="4">
+          <div><b data-i18n="about_franchise_t"></b><p data-i18n="about_franchise_d"></p></div>
+          <a class="btn btn-ghost btn-sm" href="https://new.secretscakes.com/en/franchise/" target="_blank" rel="noopener" data-i18n="about_franchise_cta"></a>
+        </div>
         <p class="signature reveal" data-delay="4" data-i18n="about_sign"></p>
       </div>
     </div>
@@ -171,6 +187,30 @@
         <p class="sec-sub reveal" data-delay="2" data-i18n="coll_sub"></p>
       </div>
       <div class="cakes-grid" id="cakesGrid"></div>
+    </div>
+  </section>
+
+  <!-- Full Menu -->
+  <section id="menu">
+    <div class="container">
+      <div class="sec-head">
+        <span class="kicker reveal" data-i18n="menu_kicker">قائمتنا</span>
+        <h2 class="sec-title reveal" data-delay="1"><span data-i18n="menu_title1">القائمة</span> <span class="gold" data-i18n="menu_title2">الكاملة</span></h2>
+        <p class="sec-sub reveal" data-delay="2" data-i18n="menu_sub"></p>
+      </div>
+      <div class="menu-toolbar reveal" data-delay="2">
+        <div class="menu-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="menuSearch" type="search" data-i18n-ph="menu_search_ph" placeholder="ابحث عن كيكة…">
+        </div>
+        <div class="menu-cats" id="menuCats"></div>
+      </div>
+      <p class="menu-count reveal" data-delay="2"><b id="menuCount">0</b> <span data-i18n="menu_count">صنف متاح</span> · <span data-i18n="menu_hint"></span></p>
+      <div id="menuGroups"></div>
+      <div class="menu-empty" id="menuEmpty" hidden>
+        <span>🔍</span>
+        <p data-i18n="menu_empty"></p>
+      </div>
     </div>
   </section>
 
@@ -247,6 +287,29 @@
     </div>
   </section>
 
+  <!-- Branches -->
+  <section id="branches">
+    <div class="container">
+      <div class="sec-head">
+        <span class="kicker reveal" data-i18n="br_kicker">أين تجدنا</span>
+        <h2 class="sec-title reveal" data-delay="1"><span data-i18n="br_title1">فروعنا</span> <span class="gold" data-i18n="br_title2">في لبنان</span></h2>
+        <p class="sec-sub reveal" data-delay="2" data-i18n="br_sub"></p>
+      </div>
+      <div class="branches-grid" id="branchesGrid"></div>
+      <div class="branches-intl reveal" data-delay="2">
+        <div>
+          <h3 data-i18n="br_intl_t">فروعنا الدولية</h3>
+          <p data-i18n="br_intl_d"></p>
+        </div>
+        <div class="intl-links">
+          <a href="https://new.secretscakes.com/en-lb/home/" target="_blank" rel="noopener" data-i18n="br_lb">لبنان</a>
+          <a href="https://new.secretscakes.com/en-jo/home/" target="_blank" rel="noopener" data-i18n="br_jo">الأردن</a>
+          <a href="https://new.secretscakes.com/en-sa/home/" target="_blank" rel="noopener" data-i18n="br_sa">السعودية</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Contact -->
   <section id="contact">
     <div class="container">
@@ -306,7 +369,9 @@
           <li><a href="#home" data-i18n="nav_home"></a></li>
           <li><a href="#about" data-i18n="nav_about"></a></li>
           <li><a href="#collection" data-i18n="nav_collection"></a></li>
+          <li><a href="#menu" data-i18n="nav_menu"></a></li>
           <li><a href="#builder" data-i18n="nav_builder"></a></li>
+          <li><a href="#branches" data-i18n="nav_branches"></a></li>
           <li><a href="#contact" data-i18n="nav_contact"></a></li>
         </ul>
       </div>
@@ -357,6 +422,7 @@
 
   <noscript><p style="text-align:center;padding:40px">Please enable JavaScript / الرجاء تفعيل الجافاسكريبت</p></noscript>
 
+  <script src="assets/js/menu-data.js"></script>
   <script src="assets/js/i18n.js"></script>
   <script src="assets/js/main.js"></script>
 </body>

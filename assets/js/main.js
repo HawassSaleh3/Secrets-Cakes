@@ -6,12 +6,12 @@
    ⚙️ CONFIG — عدّل هنا معلومات متجرك بسهولة
    ========================================================= */
 const CONFIG = {
-  whatsapp: "96176000000",            // ⚠️ ضع رقم الواتساب بصيغة دولية بدون + (مثال: 96170123456)
-  phoneDisplay: "+961 76 000 000",    // الرقم كما يظهر للزوار
-  address: { ar: "بعبدا — جبل لبنان، لبنان", en: "Baabda — Mount Lebanon, Lebanon" },
-  instagram: "https://instagram.com/secretscakes",
-  facebook: "https://facebook.com/secretscakes",
-  tiktok: "https://tiktok.com/@secretscakes",
+  whatsapp: (typeof WHATSAPP_MAIN !== "undefined" ? WHATSAPP_MAIN : "96170448544"),
+  phoneDisplay: (typeof WHATSAPP_DISPLAY !== "undefined" ? WHATSAPP_DISPLAY : "+961 70 448 544"),
+  address: { ar: "سن الفيل — الطريق العام، بيروت", en: "Sanayeh — Main Road, Beirut" },
+  instagram: (typeof SOCIALS !== "undefined" ? SOCIALS.instagram : "https://www.instagram.com/secretscakeslb/"),
+  facebook: (typeof SOCIALS !== "undefined" ? SOCIALS.facebook : "https://www.facebook.com/secretscakeslb"),
+  tiktok: (typeof SOCIALS !== "undefined" ? SOCIALS.tiktok : "https://www.tiktok.com/@secretscakeslb"),
 };
 
 /* ---------- Helpers ---------- */
@@ -86,9 +86,12 @@ function setLang(lang, announce = false) {
 
   renderMarquee();
   renderProducts();
+  renderMenuCats();
+  renderMenu();
   renderOccasions();
   renderGallery();
   renderReviews();
+  renderBranches();
   renderBuilder();
   document.title = lang === "ar" ? "سيكرتس كيكز | كل كيكة تحمل سراً" : "Secrets Cakes | Every Cake Holds a Secret";
   if (announce) toast("toast_lang");
@@ -130,6 +133,125 @@ function renderProducts() {
       </div>
     </article>`
   ).join("");
+  observeReveals();
+}
+
+/* =========================================================
+   FULL MENU (real catalog: search + category filter)
+   ========================================================= */
+const MENU_STATE = { cat: "all", q: "" };
+
+function menuItemMatches(it, q) {
+  if (!q) return true;
+  const hay = `${it.n} ${it.d} ${it.da}`.toLowerCase();
+  return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w));
+}
+
+function menuOrderLink(itemName, label, price) {
+  const L = STATE.lang;
+  const size = label ? ` — ${label}` : "";
+  const msg = L === "ar"
+    ? `مرحباً سيكرتس كيكز 🎂\nأودّ طلب: ${itemName}${size} (${fmt(price)})\nشكراً!`
+    : `Hello Secrets Cakes 🎂\nI'd like to order: ${itemName}${size} (${fmt(price)})\nThank you!`;
+  return waLink(msg);
+}
+
+function renderMenuCats() {
+  const L = STATE.lang;
+  if (typeof MENU === "undefined") return;
+  const box = $("#menuCats");
+  if (!box) return;
+  const pills = [{ id: "all", icon: "✨", count: MENU.reduce((s, c) => s + c.items.length, 0) }]
+    .concat(MENU.map((c) => ({ id: c.id, icon: c.icon, count: c.items.length })));
+  box.innerHTML = pills.map((p) => {
+    const cat = p.id === "all" ? null : MENU.find((c) => c.id === p.id);
+    const label = p.id === "all" ? t("menu_all") : cat[L === "ar" ? "ar" : "en"];
+    return `<button class="mcat ${MENU_STATE.cat === p.id ? "on" : ""}" data-cat="${p.id}">
+      <span class="mc-ico">${p.icon}</span><span>${label}</span><em>${p.count}</em>
+    </button>`;
+  }).join("");
+  $$("#menuCats .mcat").forEach((b) =>
+    b.addEventListener("click", () => { MENU_STATE.cat = b.dataset.cat; renderMenuCats(); renderMenu(); })
+  );
+}
+
+function renderMenu() {
+  const L = STATE.lang;
+  if (typeof MENU === "undefined") return;
+  const groupsBox = $("#menuGroups");
+  if (!groupsBox) return;
+  const q = MENU_STATE.q.trim();
+  let total = 0;
+  const html = MENU
+    .filter((c) => MENU_STATE.cat === "all" || c.id === MENU_STATE.cat)
+    .map((c) => {
+      const items = c.items.filter((it) => menuItemMatches(it, q));
+      if (!items.length) return "";
+      total += items.length;
+      const cards = items.map((it) => {
+        const desc = L === "ar" ? it.da : it.d;
+        const min = Math.min(...it.v.map((x) => x[1]));
+        const variants = it.v.map(([label, price]) => `
+          <div class="mvar">
+            <span>${label || (L === "ar" ? "السعر" : "Price")}</span>
+            <b>${fmt(price)}</b>
+            <a class="morder" target="_blank" rel="noopener" href="${menuOrderLink(it.n, label, price)}" aria-label="${t("menu_order")}">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+          </div>`).join("");
+        return `<article class="menu-item">
+          <div class="mi-head"><h4>${it.n}</h4></div>
+          <p class="mi-desc">${desc}</p>
+          <div class="mvars">${variants}</div>
+          <div class="mi-foot"><span>${t("menu_from")} <b>${fmt(min)}</b></span></div>
+        </article>`;
+      }).join("");
+      return `<div class="menu-group">
+        <div class="menu-group-head"><span class="mg-ico">${c.icon}</span>
+          <h3>${c[L === "ar" ? "ar" : "en"]}</h3>
+          <em>${items.length} ${t("menu_items_c")}</em>
+        </div>
+        <div class="menu-grid">${cards}</div>
+      </div>`;
+    }).join("");
+  groupsBox.innerHTML = html;
+  $("#menuCount").textContent = total;
+  $("#menuEmpty").hidden = total !== 0;
+}
+
+function initMenuSearch() {
+  const input = $("#menuSearch");
+  if (!input) return;
+  input.addEventListener("input", () => { MENU_STATE.q = input.value; renderMenu(); });
+}
+
+/* =========================================================
+   BRANCHES
+   ========================================================= */
+function renderBranches() {
+  const L = STATE.lang;
+  const grid = $("#branchesGrid");
+  if (!grid || typeof BRANCHES === "undefined") return;
+  grid.innerHTML = BRANCHES.map((b, i) => `
+    <article class="branch-card reveal" data-delay="${(i % 4)}">
+      <span class="br-pin"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+      <h3>${b[L === "ar" ? "ar" : "en"]}</h3>
+      <a class="br-phone" href="tel:+${b.tel}" dir="ltr">${b.phone}</a>
+      <span class="br-hours">${t("br_hours")}</span>
+      <div class="br-actions">
+        <a class="btn btn-ghost btn-sm" href="tel:+${b.tel}">${t("br_call")}</a>
+        <a class="btn btn-gold btn-sm" target="_blank" rel="noopener" href="https://wa.me/${b.tel}?text=${encodeURIComponent(L === "ar" ? "مرحباً سيكرتس كيكز 🎂 أودّ الطلب من فرع " + b.ar : "Hello Secrets Cakes 🎂 I'd like to order from " + b.en)}">${t("br_dir")}</a>
+      </div>
+    </article>`).join("") + `
+    <article class="branch-card branch-main reveal" data-delay="1">
+      <span class="br-pin"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 2 12c0 4.4 2.9 8.2 6.8 9.5.5.1.7-.2.7-.5v-1.7c-2.8.6-3.4-1.2-3.4-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.4-1.1.6-1.3-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.2-.4-1.2.1-2.6 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.6.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5A10 10 0 0 0 22 12 10 10 0 0 0 12 2z"/></svg></span>
+      <h3>${t("br_main")}</h3>
+      <a class="br-phone" href="https://wa.me/${CONFIG.whatsapp}" target="_blank" rel="noopener" dir="ltr">${CONFIG.phoneDisplay}</a>
+      <span class="br-hours">${t("br_hours")}</span>
+      <div class="br-actions">
+        <a class="btn btn-gold btn-sm" target="_blank" rel="noopener" href="${waLink(STATE.lang === "ar" ? "مرحباً سيكرتس كيكز 🎂\nأودّ الاستفسار عن طلب كيكة خاصة." : "Hello Secrets Cakes 🎂\nI'd like to ask about a custom cake order.")}">${t("nav_order")}</a>
+      </div>
+    </article>`;
   observeReveals();
 }
 
@@ -570,7 +692,7 @@ function initNav() {
     nav.classList.toggle("scrolled", window.scrollY > 40);
     $("#fabTop").classList.toggle("show", window.scrollY > 600);
     // active link
-    const secs = ["home", "about", "collection", "builder", "occasions", "gallery", "contact"];
+    const secs = ["home", "about", "collection", "menu", "builder", "occasions", "gallery", "branches", "contact"];
     let active = "home";
     secs.forEach((id) => {
       const el = document.getElementById(id);
@@ -634,7 +756,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initNav();
   initCursor();
+  initMenuSearch();
+  // preserve menu search text across language switches
+  const ms = $("#menuSearch");
+  if (ms) ms.addEventListener("input", () => { ms.setAttribute("value", ms.value); });
   setLang(STATE.lang);
+  if (ms && MENU_STATE.q) ms.value = MENU_STATE.q;
 
   // builder nav buttons
   $("#bPrev").addEventListener("click", () => {
